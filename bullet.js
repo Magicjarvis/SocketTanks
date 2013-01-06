@@ -1,6 +1,6 @@
 (function(window) {
-  function Bullet(x, y, rot) {
-    this.initialize(x, y, rot);
+  function Bullet() {
+    this.initialize();
   }
 
   var p = Bullet.prototype = new Shape();
@@ -19,19 +19,19 @@
   p.active;
   p.shot;
 
-  p.initialize = function (x, y, rot) {
+  p.initialize = function () {
     this.Shape_initialize(); // what does this do?
-    this.x = x;
-    this.y = y;
-    this.rotation = rot
     this.power = this.INITIAL_POWER;
     this.active = true;
     this.shot = false;
   }
 
-  p.fire = function () {
+  p.fire = function (x, y, rot) {
     this.graphics.beginFill('rgba(0, 0, 0, 1)')
       .drawCircle(0,0, 3);
+    this.x = x;
+    this.y = y;
+    this.rotation = rot;
     this.vx = Math.sin(this.rotation * Math.PI/-180) * this.power;
     this.vy = Math.cos(this.rotation * Math.PI/-180) * this.power;
     this.shot = true;

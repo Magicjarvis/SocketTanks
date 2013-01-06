@@ -7,6 +7,7 @@
   tank = null;
   var healthMessage;
   var holdingSpacebar = false;
+  var currentBullet;
   bullets = [];
   bulletCount = 0;
   opponent = {'tank': null, 'bullets': null};
@@ -53,9 +54,9 @@
     }
     bullets.forEach(function (b) {
       if (!proc[b.id]) {
-        proc[b.id] = new Bullet(b.x, b.y, 0);
+        proc[b.id] = new Bullet();
         stage.addChild(proc[b.id]);
-        proc[b.id].fire(); // just draws because not ticking (used as dataholder)
+        proc[b.id].fire(b.x, b.y, 0); // just draws because not ticking (used as dataholder)
       } else {
         keyMap[b.id] = true;
         proc[b.id].x = b.x; 
@@ -104,10 +105,7 @@
   }
 
   var makeBullet = function () {
-    var gunX = tank.gun.x;
-    var gunY = tank.gun.y;
-    var pt = tank.localToGlobal(gunX, gunY);
-    var b = new Bullet(pt.x, pt.y, tank.gun.rotation); 
+    var b = new Bullet();
     stage.addChild(b);
     bullets.push(b);
     b.id = bulletCount++;
@@ -127,12 +125,18 @@
     }
 
     if (KEY_SPACE_DOWN) {
+      if (!currentBullet) {
+        currentBullet = makeBullet();
+      }
+      currentBullet.increasePower();
       tank.gunCharge();
       holdingSpacebar = true;
     } else if (holdingSpacebar && !KEY_SPACE_DOWN) {
-      var bullet = makeBullet(); 
-      bullet.power = tank.power;
-      bullet.fire();
+      var gunX = tank.gun.x;
+      var gunY = tank.gun.y;
+      var pt = tank.localToGlobal(gunX, gunY);
+      currentBullet.fire(pt.x, pt.y, tank.gun.rotation);
+      currentBullet = null;
       holdingSpacebar = false;
       tank.resetPower(); // reset power (also have increase power)
     }
