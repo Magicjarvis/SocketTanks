@@ -1,16 +1,15 @@
 (function () {
   var canvas = document.getElementById('tanksCanvas');
   // TODO(jarv): security
-  var socket = io.connect('192.168.1.122'); 
+  var socket = io.connect('192.168.1.108'); // We need to change. Host on heroku? 
   stage = new Stage(canvas);
-  //stage.addChild
   
   tank = null;
   var healthMessage;
   var holdingSpacebar = false;
   bullets = [];
   bulletCount = 0;
-  clients = {};
+  opponent = {'tank': null, 'bullets': null};
 
   socket.on('accept', function (id, tanks) {
     console.log('your tank id is: ' + id);
@@ -24,26 +23,24 @@
         stage.addChild(healthMessage);
       } else {
         other = new Tank(0, canvas.height);
-        clients[tanks[addr].id] = other;
+        opponent.tank = other
         other.x = tanks[addr].x;
-      stage.addChild(other);
+        stage.addChild(other);
       }
     } 
     stage.update();
-  }); socket.on('refuse', function () {
+  }); 
+
+  socket.on('refuse', function () {
     alert("Sorry, too many players!"); 
     return;
   })
 
-  
-
   socket.on('join', function (id) {
-    if (!(id in clients)) {
-      var clientTank = new Tank(0, canvas.height);
-      clients[id] = clientTank; 
-      stage.addChild(clientTank);
-      stage.update();
-    }
+    var clientTank = new Tank(0, canvas.height);
+    opponent.tank = clientTank;
+    stage.addChild(clientTank);
+    stage.update();
     console.log(id + ' has joined!'); 
   });
 
@@ -78,10 +75,9 @@
     return proc;// this shouldn't be here
   };
   socket.on('update', function (c) {
-    clients[c.id].x = c.x;
-    clients[c.id].gun.rotation = c.rot; 
-    clients['bullets'] = processBullets(c.bullets); 
-    
+    opponent.tank.x = c.x;
+    opponent.tank.gun.rotation = c.rot;
+    opponent.bullets = processBullets(c.bullets);
     stage.update();
   });
 
