@@ -1,9 +1,10 @@
 SocketTanks
 ===========
 
-Objects
--------
-###Tank
+##Objects
+
+Tank
+----
 ####Constructor
 Tank(x, y)
 ####Properties
@@ -20,7 +21,8 @@ Tank(x, y)
 - _takeHit(dmg)_  
 - _resetPower()_ 
 
-###Bullet
+Bullet
+------
 ####Constructor
 Bullet()
 ####Properties
