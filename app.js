@@ -30,7 +30,7 @@ websock.sockets.on('connection', function (sock) {
 
   // Accepts people in clients (new visitors added above)
   if (conn.address in clients) {
-    sock.emit('accept', clients[conn.address].id, clients);
+    sock.emit('accept', clients[conn.address]);
   }
   
   sock.on('update', function (x, rot, bullets) {

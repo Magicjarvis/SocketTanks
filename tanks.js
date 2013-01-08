@@ -8,27 +8,20 @@
   var healthMessage;
   var holdingSpacebar = false;
   var currentBullet;
+  var id;
   bullets = [];
   bulletCount = 0;
   opponent = {'tank': null, 'bullets': null};
 
-  socket.on('accept', function (id, tanks) {
-    console.log('your tank id is: ' + id);
-    for (addr in tanks) {
-      var other;
-      if (tanks[addr].id == id) {
-        tank = new Tank(0, canvas.height); 
-        tank.x = tanks[addr].x;
-        stage.addChild(tank);
-        healthMessage = new Text("Your Health: "+tank.hp,"bold 24px Arial", "#000");
-        stage.addChild(healthMessage);
-      } else {
-        other = new Tank(0, canvas.height);
-        opponent.tank = other
-        other.x = tanks[addr].x;
-        stage.addChild(other);
-      }
-    } 
+  socket.on('accept', function (self) {
+    // We're in! Draw tank and health on stage. Save id.
+    id = self.id;
+    console.log('your tank id is: ' + self.id);
+    tank = new Tank(0, canvas.height); 
+    tank.x = self.x;
+    stage.addChild(tank);
+    healthMessage = new Text("Your Health: "+tank.hp,"bold 24px Arial", "#000");
+    stage.addChild(healthMessage);
     stage.update();
   }); 
 
@@ -38,6 +31,7 @@
   })
 
   socket.on('join', function (id) {
+    // Another tank has joined!
     var clientTank = new Tank(0, canvas.height);
     opponent.tank = clientTank;
     stage.addChild(clientTank);
@@ -76,9 +70,20 @@
     return proc;// this shouldn't be here
   };
   socket.on('update', function (c) {
-    opponent.tank.x = c.x;
-    opponent.tank.gun.rotation = c.rot;
-    opponent.bullets = processBullets(c.bullets);
+    if (c.id == id) {
+      // If update from self (different tab?), update self
+      tank.x = c.x;
+      tank.gun.rotation = c.rot;
+    } else {
+      if (!opponent.tank) {
+        // If update from unseen opponent. Create opponent
+        opponent.tank = new Tank(c.x, canvas.height);
+        stage.addChild(opponent.tank);
+      }
+      opponent.tank.x = c.x;
+      opponent.tank.gun.rotation = c.rot;
+      opponent.bullets = processBullets(c.bullets);
+    }
     stage.update();
   });
 
