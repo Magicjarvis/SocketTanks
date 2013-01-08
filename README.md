@@ -9,7 +9,7 @@ Tank
 Tank(x, y)
 ####Properties
 - _body_ : Shape  
-- _gun_ : Shape  
+- _gun_ : Container  
 - _hp_ : number  
 
 ####Methods

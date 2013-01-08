@@ -9,18 +9,15 @@
 
   p.body;
   p.gun;
+  p.red;
 
   var BODY_WIDTH = 60;
   var BODY_HEIGHT = 30;
 
-
   // static properties 
   p.SPEED = 5;
   
-  
-
   // public properties
-  p.power = 10;
   p.hp = 500;
 
   p.left = function () {
@@ -48,40 +45,35 @@
     }
   }
 
-  p.red = 1;
   p.gunCharge = function () {
-    if (p.power >= 25) {
-      p.power = 25; 
-      /*this.gun.graphics.beginFill('rgba(255, 0, 0, 50)')
-        .drawRoundRect(0, 0, 10, 25, 5);*/
-    } else {
-      p.power *= 1.02; 
-      /*var log = 'rgba('+ Math.round(255 * ((p.power - 10)/15.0)) +', 0, 0, 50)';
-      this.gun.graphics.beginFill(log)
-        .drawRoundRect(0, 0, 10, 25, 5);*/
-    }
+    this.red.alpha += 0.02
   }
 
   p.resetPower = function () {
-    p.power = 10; 
-    this.gun.graphics.beginFill('rgba(1, 0, 0, 50)')
-      .drawRoundRect(0, 0, 10, 25, 5);
+    this.red.alpha = 0;
   }
 
   p.initialize = function (x, y) {
     this.Container_initialize();
 
     this.body = new Shape();
-    this.gun = new Shape();
+    this.gun = new Container();
+    this.red = new Shape();
+    var gun = new Shape();
 
+    this.gun.addChild(gun);
+    this.gun.addChild(this.red);
     this.addChild(this.body);
     this.addChild(this.gun);
     
     this.body.graphics.beginFill('rgba('+ Math.floor(Math.random() * 255) +', 125, 125, 50)')
       .drawRoundRect(0, 0, BODY_WIDTH, BODY_HEIGHT, 5);
 
-    this.gun.graphics.beginFill('rgba(1, 0, 0, 50)')
+    gun.graphics.beginFill('rgba(0, 0, 0, 1)')
       .drawRoundRect(0, 0, 10, 25, 5);
+    this.red.graphics.beginFill('rgba(255, 0, 0, 1)')
+      .drawRoundRect(0, 0, 10, 25, 5);
+    this.red.alpha = 0;
     this.body.x = x;
     this.body.y = y - BODY_HEIGHT;
     this.gun.x = x + BODY_WIDTH/2;
