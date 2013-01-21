@@ -1,7 +1,7 @@
 (function () {
   var canvas = document.getElementById('tanksCanvas');
   // TODO(jarv): security
-  var socket = io.connect('192.168.1.108'); // We need to change. Host on heroku? 
+  var socket = io.connect('localhost'); // We need to change. Host on heroku? 
   stage = new Stage(canvas);
   
   tank = null;

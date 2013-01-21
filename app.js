@@ -1,6 +1,7 @@
 var app = require('http');
 var io = require('socket.io');
 var ns = require('node-static'); // for serving files, jervis
+var url = require('url');
 
 
 var server = app.createServer(function(req, res) {
@@ -17,28 +18,40 @@ var userCount = 0;
 var clients = {};
 
 websock.sockets.on('connection', function (sock) {
-  var conn = sock.handshake.address;
-  if (!(conn.address in clients)) {
-    if (Object.keys(clients).length > 1) {
+  var query = url.parse(sock.handshake.headers.referer, true).query;
+  var room = query.room || 'random';
+  // var conn = sock.handshake.address;
+  if (!(sock.id in clients)) {
+    if (websock.sockets.clients(room).length > 1) {
       sock.emit('refuse'); 
     } else {
-      clients[conn.address] = {'id': userCount++, 'x': 0, 'rot': 201, 'bullets': []};
-      sock.broadcast.emit('join', clients[conn.address].id);
-      console.log("Got a new connection from " + conn.address);
+      clients[sock.id] = {'id': userCount++, 'x': 0, 'rot': 201, 'bullets': []};
+      sock.broadcast.to(room).emit('join', clients[sock.id].id);
+      console.log("Got a new connection with id: " + sock.id);
     }
+  } else {
+    sock.get('room', function (err, room) {
+      console.log(sock.id + " Left room: " + room);
+      sock.leave(room);
+    });
   }
 
   // Accepts people in clients (new visitors added above)
-  if (conn.address in clients) {
-    sock.emit('accept', clients[conn.address]);
+  if (sock.id in clients) {
+    sock.join(room);
+    console.log(sock.id + " Joined room: " + room);
+    sock.set('room', room);
+    sock.emit('accept', clients[sock.id]);
   }
   
   sock.on('update', function (x, rot, bullets) {
-    client = clients[conn.address];
+    client = clients[sock.id];
     client.x = x;
     client.rot = rot;
     client.bullets = bullets;
-    sock.broadcast.emit('update', clients[conn.address]);
+    sock.get('room', function(err, room) {
+      sock.broadcast.to(room).emit('update', clients[sock.id]);
+    });
   });
 });
 
