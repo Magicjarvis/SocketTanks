@@ -1,7 +1,7 @@
 (function () {
   var canvas = document.getElementById('tanksCanvas');
   // TODO(jarv): security
-  var socket = io.connect('localhost'); // We need to change. Host on heroku? 
+  var socket = io.connect('128.237.136.111'); // We need to change. Host on heroku? 
   stage = new Stage(canvas);
   
   tank = null;
@@ -37,6 +37,18 @@
     stage.addChild(clientTank);
     stage.update();
     console.log(id + ' has joined!'); 
+  });
+
+  socket.on('leave', function (leaveId) {
+    if (id == leaveId) {
+      alert("You somehow changed rooms! Try checking another tab.");
+      stage.removeChild(tank);
+      tank = null;
+    } else {
+      stage.removeChild(opponent.tank);
+      opponent.tank = null;
+    }
+    stage.update();
   });
 
 
@@ -77,7 +89,7 @@
     } else {
       if (!opponent.tank) {
         // If update from unseen opponent. Create opponent
-        opponent.tank = new Tank(c.x, canvas.height);
+        opponent.tank = new Tank(0, canvas.height);
         stage.addChild(opponent.tank);
       }
       opponent.tank.x = c.x;

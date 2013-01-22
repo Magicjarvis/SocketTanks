@@ -17,6 +17,8 @@ server.listen(8080);
 var userCount = 0;
 var clients = {};
 
+websock.set('log', 0);
+
 websock.sockets.on('connection', function (sock) {
   var query = url.parse(sock.handshake.headers.referer, true).query;
   var room = query.room || 'random';
@@ -32,6 +34,7 @@ websock.sockets.on('connection', function (sock) {
   } else {
     sock.get('room', function (err, room) {
       console.log(sock.id + " Left room: " + room);
+      sock.broadcast.to(room).emit('leave', clients[sock.id]);
       sock.leave(room);
     });
   }
@@ -43,6 +46,14 @@ websock.sockets.on('connection', function (sock) {
     sock.set('room', room);
     sock.emit('accept', clients[sock.id]);
   }
+
+  sock.on('disconnect', function() {
+    sock.get('room', function(err, room) {
+      sock.broadcast.to(room).emit('leave', clients[sock.id]);
+      console.log(sock.id + " Left room: " + room);
+      sock.leave(room);
+    });
+  })
   
   sock.on('update', function (x, rot, bullets) {
     client = clients[sock.id];
